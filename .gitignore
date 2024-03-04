@@ -40,3 +40,4 @@
 # others
 .vscode
 build
+cache

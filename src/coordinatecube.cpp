@@ -383,20 +383,14 @@ void init_pruning(const std::filesystem::path &cache_dir)
 void set_pruning(char *table, int index, char value)
 {
     if ((index & 1) == 0)
-        table[index / 2] &= 0xf0 | value;
+        table[index >> 1] &= 0xf0 | value;
     else
-        table[index / 2] &= 0x0f | (value << 4);
+        table[index >> 1] &= 0x0f | (value << 4);
+
 }
 
 // Extract pruning value
 char get_pruning(char *table, int index)
 {
-    char res;
-
-    if ((index & 1) == 0)
-        res = (table[index / 2] & 0x0f);
-    else
-        res = ((table[index / 2] >> 4) & 0x0f);
-
-    return res;
+    return (index & 1) == 0 ? (table[index >> 1] & 0x0f) : ((table[index >> 1] >> 4) & 0x0f);
 }

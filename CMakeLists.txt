@@ -8,9 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # add compile-time flags
-add_compile_options(-Wall -Wextra -g)
+# add_compile_options(-Wall -Wextra -g)
 
-# set(CMAKE_BUILD_TYPE release)
+set(CMAKE_BUILD_TYPE release)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 # specify the directories which contain the source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")

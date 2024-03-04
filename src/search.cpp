@@ -48,8 +48,8 @@ std::string solution_to_string(Search &search, int length)
     std::string s;
     for (int i = 0; i < length; i++)
     {
-        s += ax_map[search.ax[i]];
-        s += po_map[search.po[i]];
+        s.append(1, ax_map[search.ax[i]]);
+        s.append(po_map[search.po[i]]);
     }
     return s;
 }
@@ -174,56 +174,42 @@ int total_depth(Search &search, int depthPhase1, int maxDepth)
 
 std::string kociemba(const std::string &cubeString, int maxDepth, int timeOut, const std::filesystem::path &cache_dir)
 {
+    if (cubeString.size() != 54)
+    {
+        std::cerr << "Error: wrong input, maybe some blocks are missing or surplus\n";
+        return "";
+    }
+    else if(cubeString == "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB")
+    {        
+        return "";
+    }
+    else if(cubeString[4] != 'U' || cubeString[13] != 'R' || cubeString[22] != 'F' || cubeString[31] != 'D' || cubeString[40] != 'L' || cubeString[49] != 'B')
+    {
+        std::cerr << "Error: wrong input, please check the center block\n";
+        return "";
+    }
+    
     Search search;
     CubeFace cf;
     CubeState cs;
     CoordCube cc;
 
-    int s, i;
-    int mv, n;
-    int busy;
-    int depthPhase1;
+    int s;
+    int mv = 0, n = 0;
+    bool busy = false;
+    int depthPhase1 = 1;
     // +++++++++++++++++++++check for wrong input +++++++++++++++++++++++++++++
-    int count[6] = {0};
 
-    if (PRUNING_INITED == 0)
+    if (!PRUNING_INITED)
     {
         init_pruning(cache_dir);
     }
-
-    for (i = 0; i < 54; i++)
-        switch (cubeString[i])
-        {
-        case 'U':
-            count[U]++;
-            break;
-        case 'R':
-            count[R]++;
-            break;
-        case 'F':
-            count[F]++;
-            break;
-        case 'D':
-            count[D]++;
-            break;
-        case 'L':
-            count[L]++;
-            break;
-        case 'B':
-            count[B]++;
-            break;
-        }
-
-    for (i = 0; i < 6; i++)
-        if (count[i] != 9)
-        {
-            return "";
-        }
 
     cf = string_to_cubeface(cubeString);
     cs = to_CubeState(cf);
     if ((s = verify(cs)) != 0)
     {
+        std::cerr << "Error: wrong input\n";
         return "";
     }
 
@@ -242,10 +228,6 @@ std::string kociemba(const std::string &cubeString, int maxDepth, int timeOut, c
     search.UBtoDF[0] = cc.UBtoDF;
 
     search.minDistPhase1[1] = 1; // else failure for depth=1, n=0
-    mv = 0;
-    n = 0;
-    busy = 0;
-    depthPhase1 = 1;
 
     auto tStart = std::chrono::system_clock::now();
 
@@ -269,41 +251,39 @@ std::string kociemba(const std::string &cubeString, int maxDepth, int timeOut, c
                 { // increment axis
                     if (++search.ax[n] > 5)
                     {
-                        // time out
-                        if ((std::chrono::system_clock::now() - tStart) > std::chrono::milliseconds(timeOut))
-                        {
-                            return "";
-                        }
-
                         if (n == 0)
                         {
                             if (depthPhase1 >= maxDepth)
+                            {
+                                std::cerr << "Error: maxDepth reached\n";
                                 return "";
+                            }
                             else
                             {
                                 depthPhase1++;
                                 search.ax[n] = 0;
                                 search.po[n] = 1;
-                                busy = 0;
+                                busy = false;
                                 break;
                             }
                         }
                         else
                         {
                             n--;
-                            busy = 1;
+                            busy = true;
                             break;
                         }
                     }
                     else
                     {
                         search.po[n] = 1;
-                        busy = 0;
+                        busy = false;
                     }
                 } while (n != 0 && (search.ax[n - 1] == search.ax[n] || search.ax[n - 1] - 3 == search.ax[n]));
             }
             else
-                busy = 0;
+                busy = false;
+
         } while (busy);
 
         // +++++++++++++ compute new coordinates and new minDistPhase1 ++++++++++
@@ -327,7 +307,12 @@ std::string kociemba(const std::string &cubeString, int maxDepth, int timeOut, c
                 }
             }
         }
-    } while (1);
 
-    return "";
+        // time out
+        if ((std::chrono::system_clock::now() - tStart) > std::chrono::milliseconds(timeOut))
+        {
+            std::cerr << "Error: time out\n";
+            return "";
+        }
+    } while (1);
 }
