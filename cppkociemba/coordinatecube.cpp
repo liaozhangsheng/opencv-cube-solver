@@ -1,5 +1,5 @@
-#include "cache_manager.h"
-#include "coordinatecube.h"
+#include "include/cache_manager.h"
+#include "include/coordinatecube.h"
 
 int twistMove[N_TWIST][N_MOVE];
 int flipMove[N_FLIP][N_MOVE];

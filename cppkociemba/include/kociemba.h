@@ -33,6 +33,6 @@ std::vector<std::string> parse_steps(const std::string &steps);
  *          U2 U D for example.<br>
  * @return The solution string.
  */
-std::string kociemba(const std::string &cubeString, int maxDepth, int timeOut, const std::filesystem::path &cache_dir);
+std::string kociemba(const std::string &cubeString, int maxDepth = 24, int timeOut = 1000, const std::filesystem::path &cache_dir  = "./cache");
 
 #endif

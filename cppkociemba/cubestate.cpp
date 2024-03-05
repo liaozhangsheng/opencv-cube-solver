@@ -1,5 +1,5 @@
-#include "cubestate.h"
-#include "cubeface.h"
+#include "include/cubestate.h"
+#include "include/cubeface.h"
 
 void initializeMove(CubeState &cube, const Corner cornersPermutation[8], const char cornersOrientation[8], const Edge edgesPermutation[12], const char edgesOrientation[12])
 {

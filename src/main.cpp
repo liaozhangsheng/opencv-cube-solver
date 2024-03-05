@@ -3,21 +3,10 @@
 #include <map>
 #include <opencv2/opencv.hpp>
 
-#include "search.h"
+#include "kociemba.h"
 #include "cube.h"
 
 using namespace cube;
-
-extern std::map<cube::Side, std::vector<cube::Color>> state;
-
-std::map<cube::Color, char> sign_conv = {
-    {cube::Color::green, 'F'},
-    {cube::Color::blue, 'B'},
-    {cube::Color::red, 'R'},
-    {cube::Color::orange, 'L'},
-    {cube::Color::yellow, 'D'},
-    {cube::Color::white, 'U'},
-};
 
 std::map<cube::Side, std::vector<cube::Color>> state = {
     {up, {white, white, white, white, white, white, white, white, white}},
@@ -60,17 +49,15 @@ std::map<cube::Side, std::pair<std::pair<char, cv::Point>, std::tuple<char, cv::
 Color color_detect(cv::Vec3b hsv)
 {
     int h = hsv[0], s = hsv[1], v = hsv[2];
-    if (h > 0 && h < 20 && s > 64 && s < 255 && v > 0 && v < 255)
+    if (h > 0 && h < 20 && s > 64)
         return Color::orange;
-    else if (h > 20 && h < 70 && s > 20 && s < 255 && v > 0 && v < 255)
-        return Color::yellow;
-    else if (h > 0 && h < 40 && s > 0 && s < 60 && v > 140 && v < 255)
-        return Color::white;
-    else if (h > 110 && h < 180 && s > 70 && s < 255 && v > 0 && v < 180)
+    else if (h > 110 && h < 180 && s > 80)
         return Color::red;
-    else if (h > 40 && h < 100 && s > 40 && s < 255 && v > 0 && v < 255)
+    else if (h > 40 && h < 100 && s > 40)
         return Color::green;
-    else if (h > 90 && h < 170 && s > 60 && s < 255 && v > 0 && v < 255)
+    else if (h > 20 && h < 70 && s > 20)
+        return Color::yellow;
+    else if (h > 90 && h < 170 && s > 60)
         return Color::blue;
     else
         return Color::white;
@@ -129,6 +116,7 @@ void precess_frame(cv::Mat &img, cv::Mat &preview, std::vector<Color> &current_s
     cv::Mat frame;
 
     cv::cvtColor(img, frame, cv::COLOR_BGR2HSV);
+    cv::blur(frame, frame, cv::Size(5, 5));
 
     draw_stickers(img, stickers, Side::main);
     draw_stickers(img, stickers, Side::current);
@@ -265,6 +253,14 @@ int main(int argc, char **argv)
         else if (k == '\r' && check_state == 0b111111)
         {
             std::string cubeString;
+            std::map<cube::Color, char> sign_conv = {
+                {cube::Color::green, 'F'},
+                {cube::Color::blue, 'B'},
+                {cube::Color::red, 'R'},
+                {cube::Color::orange, 'L'},
+                {cube::Color::yellow, 'D'},
+                {cube::Color::white, 'U'},
+            };
             for (auto &side : state)
             {
                 for (auto &color : side.second)
@@ -288,10 +284,6 @@ int main(int argc, char **argv)
                 cv::imshow("Solution", result);
                 cv::waitKey(0);
                 break;
-            }
-            else
-            {
-                std::cout << "Unsolvable cube! Please carefully check your rubik's cube" << std::endl;
             }
         }
     }

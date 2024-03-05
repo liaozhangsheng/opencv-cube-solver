@@ -2,9 +2,6 @@
 #define __CUBE_H__
 
 #include <iostream>
-#include <vector>
-#include <map>
-#include <opencv2/opencv.hpp>
 
 namespace cube
 {

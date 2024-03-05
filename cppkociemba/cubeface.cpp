@@ -1,8 +1,8 @@
 #include <iostream>
 #include <memory>
 
-#include "cubeface.h"
-#include "cubestate.h"
+#include "include/cubeface.h"
+#include "include/cubestate.h"
 
 Block cornerBlock[8][3] = {{U9, R1, F3}, {U7, F1, L3}, {U1, L1, B3}, {U3, B1, R3}, {D3, F9, R7}, {D1, L9, F7}, {D7, B9, L7}, {D9, R9, B7}};
 

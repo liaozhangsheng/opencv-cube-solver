@@ -4,9 +4,9 @@
 #include <vector>
 #include <chrono>
 
-#include "search.h"
-#include "cubeface.h"
-#include "coordinatecube.h"
+#include "include/kociemba.h"
+#include "include/cubeface.h"
+#include "include/coordinatecube.h"
 
 std::map<int, char> ax_map = {{0, 'U'}, {1, 'R'}, {2, 'F'}, {3, 'D'}, {4, 'L'}, {5, 'B'}};
 std::map<int, std::string> po_map = {{1, " "}, {2, "2 "}, {3, "' "}};
@@ -62,7 +62,7 @@ int total_depth(Search &search, int depthPhase1, int maxDepth)
     int maxDepthPhase2 = std::min(10, maxDepth - depthPhase1); // Allow only max 10 moves in phase2
     int depthPhase2;
     int n;
-    int busy;
+    bool busy = false;
     for (i = 0; i < depthPhase1; i++)
     {
         mv = 3 * search.ax[i] + search.po[i] - 1;
@@ -95,7 +95,6 @@ int total_depth(Search &search, int depthPhase1, int maxDepth)
 
     depthPhase2 = 1;
     n = depthPhase1;
-    busy = 0;
     search.po[depthPhase1] = 0;
     search.ax[depthPhase1] = 0;
     search.minDistPhase2[n + 1] = 1; // else failure for depthPhase2=1, n=0
@@ -133,14 +132,14 @@ int total_depth(Search &search, int depthPhase1, int maxDepth)
                                 depthPhase2++;
                                 search.ax[n] = 0;
                                 search.po[n] = 1;
-                                busy = 0;
+                                busy = false;
                                 break;
                             }
                         }
                         else
                         {
                             n--;
-                            busy = 1;
+                            busy = true;
                             break;
                         }
                     }
@@ -150,12 +149,12 @@ int total_depth(Search &search, int depthPhase1, int maxDepth)
                             search.po[n] = 1;
                         else
                             search.po[n] = 2;
-                        busy = 0;
+                        busy = false;
                     }
                 } while (n != depthPhase1 && (search.ax[n - 1] == search.ax[n] || search.ax[n - 1] - 3 == search.ax[n]));
             }
             else
-                busy = 0;
+                busy = false;
         } while (busy);
         // +++++++++++++ compute new coordinates and new minDist ++++++++++
         mv = 3 * search.ax[n] + search.po[n] - 1;
@@ -165,10 +164,12 @@ int total_depth(Search &search, int depthPhase1, int maxDepth)
         search.parity[n + 1] = parityMove[search.parity[n]][mv];
         search.URtoDF[n + 1] = URtoDF_Move[search.URtoDF[n]][mv];
 
-        search.minDistPhase2[n + 1] = std::max(get_pruning(Slice_URtoDF_Parity_Prun, (N_SLICE2 * search.URtoDF[n + 1] + search.FRtoBR[n + 1]) * 2 + search.parity[n + 1]), get_pruning(Slice_URFtoDLF_Parity_Prun, (N_SLICE2 * search.URFtoDLF[n + 1] + search.FRtoBR[n + 1]) * 2 + search.parity[n + 1]));
+        search.minDistPhase2[n + 1] = std::max(get_pruning(Slice_URtoDF_Parity_Prun, (N_SLICE2 * search.URtoDF[n + 1] + search.FRtoBR[n + 1]) * 2 + search.parity[n + 1]),
+                                               get_pruning(Slice_URFtoDLF_Parity_Prun, (N_SLICE2 * search.URFtoDLF[n + 1] + search.FRtoBR[n + 1]) * 2 + search.parity[n + 1]));
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     } while (search.minDistPhase2[n + 1] != 0);
+
     return depthPhase1 + depthPhase2;
 }
 
@@ -179,16 +180,16 @@ std::string kociemba(const std::string &cubeString, int maxDepth, int timeOut, c
         std::cerr << "Error: wrong input, maybe some blocks are missing or surplus\n";
         return "";
     }
-    else if(cubeString == "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB")
-    {        
+    else if (cubeString == "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB")
+    {
         return "";
     }
-    else if(cubeString[4] != 'U' || cubeString[13] != 'R' || cubeString[22] != 'F' || cubeString[31] != 'D' || cubeString[40] != 'L' || cubeString[49] != 'B')
+    else if (cubeString[4] != 'U' || cubeString[13] != 'R' || cubeString[22] != 'F' || cubeString[31] != 'D' || cubeString[40] != 'L' || cubeString[49] != 'B')
     {
         std::cerr << "Error: wrong input, please check the center block\n";
         return "";
     }
-    
+
     Search search;
     CubeFace cf;
     CubeState cs;
