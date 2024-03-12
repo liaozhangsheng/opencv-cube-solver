@@ -4,6 +4,17 @@ This project implements the solution for a Rubik's Cube using C++ and OpenCV. It
 
 ## Usage
 
+[here](https://www.bilibili.com/video/BV1sS421P78z) is a short demonstration video. Once cmake is compiled, you can run the project.
+
+```shell
+mkdir build && cd build
+cmake ..
+make
+./src/main 1  # The parameter is the camera number, which is 0 by default
+```
+
+After the camera recognizes the color stability, you can press the corresponding button to save the state of the Rubik's Cube, for example, press `U` to save the color of the upper layer, and press `F` to save the color of the previous part. When the colors of the six faces have been saved, press `Enter` to solve the Rubik's Cube.
+
 The `cppkociemba` folder contains the program for the algorithm, which can be used independently. Here is an example:
 
 
@@ -26,16 +37,6 @@ int main() {
 ```
 
 After the program is run, it will generate some file storage pruning lookup table (about 7 Mb) in the cache directory, and read the cache file directly to speed up the solution of the Rubik's cube next time.
-
-Once cmake is compiled, you can run the project.
-
-```shell
-mkdir build
-cd build
-cmake ..
-make
-./src/main 1  # 参数为摄像头编号，默认为0
-```
 
 ## Cube string notation
 The names of the facelet positions of the cube (letters stand for Up, Left, Front, Right, Back, and Down):
